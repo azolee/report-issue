@@ -36,5 +36,6 @@
   "new": "Új bejelentés",
   "processing": "Megoldás alatt",
   "suspended": "Felfüggesztve",
-  "solved": "Megoldva"
+  "solved": "Megoldva",
+  "details": "Részletek"
 }

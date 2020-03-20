@@ -123,16 +123,18 @@
                         </span>
                     </div>
                     <div class="col-md-9">
-                        <h5>{{ report.title }}</h5>
-                        <p>
-                            <i>{{ report.created }}</i>
-                        </p>
+                        <h6 class="ml-3">
+                            <span class="small">
+                                <span class="badge badge-light">{{ report.created }}</span>
+                            </span>
+                        </h6>
+                        <h5 class="btn" @click.prevent="selectReport(report)">{{ report.title }}</h5>
                     </div>
                     <div class="col-md-2">
-                        <a class="btn btn-info float-right ml-1" type="button" :href="getReportUrl(report)" @click.prevent="selectReport(report)">
-                            <fa :icon="['fa', 'info']" />
+                        <a class="btn btn-outline-info btn-sm float-right ml-1" type="button" :href="getReportUrl(report)" @click.prevent="selectReport(report)">
+                            <fa :icon="['fa', 'info']" /> {{ $t('details') }}
                         </a>
-                        <a v-if="userHasAccessToReport(report)" class="btn btn-danger float-right" type="button" href="" @click.prevent="selectReportToEdit(report)">
+                        <a v-if="userHasAccessToReport(report)" class="btn btn-outline-danger btn-sm float-right" type="button" href="" @click.prevent="selectReportToEdit(report)">
                             <fa :icon="['fa', 'edit']" />
                         </a>
                     </div>
