@@ -22,9 +22,11 @@ class ReportResource extends JsonResource
             'title' => $this->title,
             'details' => $this->details,
             'status' => $this->status,
-            'phone' => $this->phone,
-            'email' => $this->email,
         ];
+        if( auth()->user()->can('update', $this->resource) ) {
+            $return['phone'] = $this->phone;
+            $return['email'] = $this->email;
+        }
         $this->prefix = 'report';
         $return = $this->relationships(
             $request,

@@ -149,12 +149,9 @@ class User extends Authenticatable implements JWTSubject
         return static::validationRules($except);
     }
     public static function validationRules($except = "") {
-        if( $except!="" ){
-            $except = ",".$except;
-        }
         return [
             'id' => 'numeric|exists:users',
-            'email' => 'bail|required|email|unique:users,email'.$except.'|max:255',
+            'email' => 'bail|required|email|unique:users,email' . ( $except ?? ",".$except ) . '|max:255',
             'name' => 'required|min:5|max:255',
             'level' => 'in:user,maintainer,admin',
             'password' => 'required_if:id,|string|min:5|max:255',

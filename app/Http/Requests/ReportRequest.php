@@ -21,8 +21,8 @@ class ReportRequest extends FormRequest
             if (!$user->isUser()) {
                 return true;
             }
-            if ($request->has('id')) {
-                $report = Report::find($request->id);
+            $report = $request->route('report');
+            if ($report) {
                 if ($report && $report->user_id === $user->id) {
                     return true;
                 }

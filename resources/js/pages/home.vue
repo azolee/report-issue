@@ -1,12 +1,12 @@
 <template>
     <card :title="$t('reports')">
         <div class="text-right">
-            <button class="btn btn-info" type="button" data-toggle="modal" data-target="#myModal">
+            <button class="btn btn-info" type="button" data-toggle="modal" data-target="#editReport" @click.prevent="selectReportToEdit({id:0})">
                 <fa :icon="['fa', 'plus']" size="1x" />
             </button>
         </div>
         <hr>
-        <div id="editReport" v-if="editReport" class="modal" :style="editModalStyle()">
+        <div id="editReport" v-if="showReportEditor" class="modal" :style="editModalStyle()">
             <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
 
@@ -28,13 +28,13 @@
                             <div class="col-md-4 text-center">
                                 <label>
                                     <fa :icon="['fa', 'mobile-alt']" />
-                                    <input type="text" v-model="report.phone" class="w-75">
+                                    <input type="text" v-model="report.phone" placeholder="ex.: 0744123456" class="w-75">
                                 </label>
                             </div>
                             <div class="col-md-4 text-center">
                                 <label>
                                     <fa :icon="['fa', 'at']" />
-                                    <input type="email" v-model="report.email" class="w-75">
+                                    <input type="email" v-model="report.email" placeholder="ex.: john@doe.com" class="w-75">
                                 </label>
                             </div>
                         </div>
@@ -48,6 +48,9 @@
                             <div class="colPhotos" :key="key" v-for="(photo, key) in report.photos" v-if="report.photos.length > 0">
                                 <img :src="photo.url" alt="photo" class="m-1 rounded-lg">
                                 <input type="hidden" v-model="photo.url" :key="key">
+                            </div>
+                            <div class="colPhotos" v-if="report.photos.length > 0">
+
                             </div>
                         </div>
                     </div>
@@ -111,10 +114,13 @@
             </li>
             <li :class="reportsLinkClass(report)" v-for="report in allReports.data" :title="$t(report.status)">
                 <div class="row">
-                    <div class="col-md-1">
-                        <h3 :class="'btn btn-'+statusToButton[report.status]">
+                    <div class="col-md-1 text-center">
+                        <h4>
                             #{{ report.id }}
-                        </h3>
+                        </h4>
+                        <span :class="'badge badge-'+statusToButton[report.status]">
+                            {{ report.status }}
+                        </span>
                     </div>
                     <div class="col-md-9">
                         <h5>{{ report.title }}</h5>
@@ -126,7 +132,7 @@
                         <a class="btn btn-info float-right ml-1" type="button" :href="getReportUrl(report)" @click.prevent="selectReport(report)">
                             <fa :icon="['fa', 'info']" />
                         </a>
-                        <a class="btn btn-danger float-right" type="button" href="" @click.prevent="selectReportToEdit(report)">
+                        <a v-if="userHasAccessToReport(report)" class="btn btn-danger float-right" type="button" href="" @click.prevent="selectReportToEdit(report)">
                             <fa :icon="['fa', 'edit']" />
                         </a>
                     </div>
@@ -146,6 +152,13 @@
     import Vue from 'vue'
     import Viewer from 'v-viewer'
     Vue.use(Viewer);
+    const basicReport = {
+        title: '',
+        details: '',
+        email: '',
+        phone: '',
+        photos: [],
+    };
     export default {
         scrollToTop: false,
 
@@ -158,13 +171,7 @@
             selectedReport: {},
             selectedReportId: null,
             editReport: null,
-            report: new Form({
-                title: '',
-                details: '',
-                email: '',
-                phone: '',
-                photos: [],
-            }),
+            report: new Form(basicReport),
             selectedStatus: 'new'
         }),
         watch: {
@@ -200,6 +207,9 @@
 
             selectedReportPhotos: function() {
                 return this.selectedReport.photos.map(item=>item.url)
+            },
+            showReportEditor(){
+                return this.editReport !== null;
             }
         },
 
@@ -256,6 +266,9 @@
                 }
             },
             selectReportToEdit(report){
+                Object.keys(basicReport).map((key) => {
+                    this.report[key] = basicReport[key]
+                });
                 Object.keys(report).map((key) => {
                     if (typeof this.report[key] !== 'undefined') {
                         this.report[key] = report[key]
@@ -269,8 +282,17 @@
                     params: { id: report.id },
                 });
                 return props.href;
+            },
+            userHasAccessToReport(report){
+                let access = false;
+                if( this.user.level && this.user.level != 'user' ){
+                    access = true;
+                }
+                if( !access && report.user && report.user.id == this.user.id ) {
+                    access = true;
+                }
+                return access;
             }
-
         },
     }
 </script>
@@ -279,6 +301,7 @@
     .colContainerPhotos {
         display: table;
         width: 100%;
+        min-height: 150px;
     }
 
     #showReport .colPhotos img {
